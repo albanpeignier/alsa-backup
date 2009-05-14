@@ -1,0 +1,16 @@
+History.txt
+Manifest.txt
+PostInstall.txt
+README.rdoc
+Rakefile
+bin/alsa.backup
+lib/alsa.backup/cli.rb
+lib/alsa_backup.rb
+script/console
+script/destroy
+script/generate
+spec/alsa.backup_cli_spec.rb
+spec/alsa_backup_spec.rb
+spec/spec.opts
+spec/spec_helper.rb
+tasks/rspec.rake
