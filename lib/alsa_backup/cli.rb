@@ -1,9 +1,10 @@
 require 'optparse'
 
+require "alsa_backup/recorder"
+
 module AlsaBackup
   class CLI
     def self.execute(stdout, arguments=[])
-
       # NOTE: the option -p/--path= is given as an example, and should be replaced in your application.
 
       options = {
@@ -36,7 +37,7 @@ module AlsaBackup
       path = options[:path]
 
       # do stuff
-      stdout.puts "To update this executable, look in lib/alsa.backup/cli.rb"
+      AlsaBackup::Recorder.new.start
     end
   end
 end
