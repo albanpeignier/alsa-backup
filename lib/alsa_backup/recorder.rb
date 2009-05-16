@@ -5,8 +5,10 @@ include FFI
 
 def try_to(message, &block)
   puts message
-  if (err = yield) < 0
-    raise "cannot #{message} (#{ALSA::strerror(err)})"
+  if (response = yield) < 0
+    raise "cannot #{message} (#{ALSA::Native::strerror(err)})"
+  else
+    response
   end
 end
 
@@ -19,6 +21,134 @@ module ALSA
   end
 
   module PCM
+
+    class Capture
+
+      attr_accessor :handle
+
+      def open(device)
+        capture_handle = MemoryPointer.new :pointer
+        try_to "open audio device #{device}" do
+          ALSA::PCM::Native::open capture_handle, device, ALSA::PCM::Native::STREAM_CAPTURE, ALSA::PCM::Native::BLOCK
+        end
+        self.handle = capture_handle.read_pointer
+
+        if block_given?
+          begin
+            yield self 
+          ensure
+            self.close
+          end
+        end
+      end
+
+      def change_hardware_parameters
+        hw_params = HwPameters.new(self)
+        begin
+          yield hw_params
+          self.hardware_parameters = hw_params
+        ensure
+          hw_params.free
+        end
+      end
+
+      def hardware_parameters=(hw_params)
+        try_to "set hw parameters" do
+          ALSA::PCM::Native::hw_params self.handle, hw_params.handle
+        end
+      end
+
+      def read
+        # TODO use real data to calculate buffer size
+        frame_count = 44100
+        format = ALSA::PCM::Native::FORMAT_S16_LE
+        
+        buffer = MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
+
+        continue = true
+        while continue
+          read_count = try_to "read from audio interface" do
+            ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
+          end
+
+          raise "can't read expected frame count (#{read_count}/#{frame_count})" unless read_count == frame_count
+          
+          continue = yield buffer, read_count
+        end
+
+        buffer.free
+      end
+
+      def close
+        try_to "close audio device" do
+          ALSA::PCM::Native::close self.handle
+        end
+      end
+
+      class HwPameters
+
+        attr_accessor :handle, :device
+
+        def initialize(device = nil)
+          hw_params_pointer = MemoryPointer.new :pointer
+          ALSA::PCM::Native::hw_params_malloc hw_params_pointer        
+          self.handle = hw_params_pointer.read_pointer
+
+          self.device = device if device
+        end
+
+        def device=(device)
+          try_to "initialize hardware parameter structure" do
+            ALSA::PCM::Native::hw_params_any device.handle, self.handle
+          end
+          @device = device
+        end
+
+        def access=(access)
+          try_to "set access type" do
+            ALSA::PCM::Native::hw_params_set_access self.device.handle, self.handle, access
+          end
+        end
+
+        def channels=(channels)
+          try_to "set channel count : #{channels}" do
+            ALSA::PCM::Native::hw_params_set_channels self.device.handle, self.handle, channels
+          end
+        end
+
+        def sample_rate=(sample_rate)
+          try_to "set sample rate" do
+            rate = MemoryPointer.new(:int)
+            rate.write_int(sample_rate)
+
+            dir = MemoryPointer.new(:int)
+            dir.write_int(0)
+
+            error_code = ALSA::PCM::Native::hw_params_set_rate_near self.device.handle, self.handle, rate, dir
+
+            rate.free
+            dir.free
+
+            error_code
+          end
+        end
+
+        def sample_format=(sample_format)
+          try_to "set sample format" do
+            ALSA::PCM::Native::hw_params_set_format self.device.handle, self.handle, sample_format
+          end
+        end
+
+        def free
+          try_to "unallocate hw_params" do
+            ALSA::PCM::Native::hw_params_free self.handle
+          end
+        end
+
+      end
+
+    end
+
     module Native
       extend FFI::Library
       ffi_lib "libasound.so"
@@ -90,60 +220,7 @@ module AlsaBackup
   class Recorder
 
     def start
-      alsa_device = "hw:0"
-      capture_handle = MemoryPointer.new :pointer
-      hw_params = MemoryPointer.new :pointer
-      format = ALSA::PCM::Native::FORMAT_S16_LE
       sample_rate = 44100
-
-      try_to "open audio device #{alsa_device}" do
-        ALSA::PCM::Native::open capture_handle, alsa_device, ALSA::PCM::Native::STREAM_CAPTURE, ALSA::PCM::Native::BLOCK
-      end
-
-      capture_handle = capture_handle.read_pointer
-
-      try_to "allocate hardware parameter structure" do
-        ALSA::PCM::Native::hw_params_malloc hw_params
-      end
-
-      hw_params = hw_params.read_pointer
-
-      try_to "initialize hardware parameter structure" do
-        ALSA::PCM::Native::hw_params_any capture_handle, hw_params
-      end
-
-      try_to "set access type" do
-        ALSA::PCM::Native::hw_params_set_access capture_handle, hw_params, ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
-      end
-
-      try_to "set sample format" do
-        ALSA::PCM::Native::hw_params_set_format capture_handle, hw_params, format
-      end
-
-      try_to "set sample rate" do
-        rate = MemoryPointer.new(:int)
-        rate.write_int(sample_rate)
-
-        dir = MemoryPointer.new(:int)
-        dir.write_int(0)
-
-        ALSA::PCM::Native::hw_params_set_rate_near capture_handle, hw_params, rate, dir
-      end
-
-      try_to "set channel count" do
-        ALSA::PCM::Native::hw_params_set_channels capture_handle, hw_params, 2
-      end
-
-      try_to "set hw parameters" do
-        ALSA::PCM::Native::hw_params capture_handle, hw_params
-      end
-
-      try_to "unallocate hw_params" do
-        ALSA::PCM::Native::hw_params_free hw_params
-      end
-
-      frame_count = sample_rate
-      buffer = MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
 
       info = Sndfile::Native::Info.new
       info[:samplerate] = sample_rate
@@ -155,27 +232,25 @@ module AlsaBackup
         raise "Not able to open output file " + Sndfile::Native::strerror(file)
       end
 
-      2.times do 
-        try_to "read from audio interface" do
-          read_size = ALSA::PCM::Native::readi(capture_handle, buffer, frame_count)
-          if read_size != frame_count
-            raise "can't read expected frame count (#{read_size}/#{frame_count})"
-          else
-            # returns value is an error code
-            read_size
-          end
+      ALSA::PCM::Capture.new.open("hw:0") do |capture|
+        capture.change_hardware_parameters do |hw_params|
+          hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
+          hw_params.sample_rate = 44100
+          hw_params.channels = 2
+          hw_params.sample_format = ALSA::PCM::Native::FORMAT_S16_LE
         end
 
-        unless Sndfile::Native::write_int(file, buffer, frame_count) == frame_count
-          raise Sndfile::Native::strerror file
+        start = Time.now
+        capture.read do |buffer, frame_count|
+          unless Sndfile::Native::write_int(file, buffer, frame_count) == frame_count
+            raise Sndfile::Native::strerror file
+          end
+
+          (Time.now - start) < 2
         end
       end
 
       Sndfile::Native::close file
-
-      try_to "close audio device" do
-        ALSA::PCM::Native::close capture_handle
-      end
     end
     
   end
