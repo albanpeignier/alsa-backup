@@ -1,8 +1,6 @@
 require 'rubygems'
 require 'ffi'
 
-include FFI
-
 module Sndfile
 
   class File

@@ -1,18 +1,17 @@
 require 'rubygems'
 require 'ffi'
 
-include FFI
-
-def try_to(message, &block)
-  puts message
-  if (response = yield) < 0
-    raise "cannot #{message} (#{ALSA::Native::strerror(err)})"
-  else
-    response
-  end
-end
-
 module ALSA
+
+  def self.try_to(message, &block)
+    puts message
+    if (response = yield) < 0
+      raise "cannot #{message} (#{ALSA::Native::strerror(err)})"
+    else
+      response
+    end
+  end
+
   module Native
     extend FFI::Library
     ffi_lib "libasound.so"
@@ -27,8 +26,8 @@ module ALSA
       attr_accessor :handle
 
       def open(device)
-        capture_handle = MemoryPointer.new :pointer
-        try_to "open audio device #{device}" do
+        capture_handle = FFI::MemoryPointer.new :pointer
+        ALSA::try_to "open audio device #{device}" do
           ALSA::PCM::Native::open capture_handle, device, ALSA::PCM::Native::STREAM_CAPTURE, ALSA::PCM::Native::BLOCK
         end
         self.handle = capture_handle.read_pointer
@@ -53,7 +52,7 @@ module ALSA
       end
 
       def hardware_parameters=(hw_params)
-        try_to "set hw parameters" do
+        ALSA::try_to "set hw parameters" do
           ALSA::PCM::Native::hw_params self.handle, hw_params.handle
         end
       end
@@ -63,11 +62,11 @@ module ALSA
         frame_count = 44100
         format = ALSA::PCM::Native::FORMAT_S16_LE
         
-        buffer = MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
+        buffer = FFI::MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
 
         continue = true
         while continue
-          read_count = try_to "read from audio interface" do
+          read_count = ALSA::try_to "read from audio interface" do
             ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
           end
 
@@ -80,7 +79,7 @@ module ALSA
       end
 
       def close
-        try_to "close audio device" do
+        ALSA::try_to "close audio device" do
           ALSA::PCM::Native::close self.handle
         end
       end
@@ -90,7 +89,7 @@ module ALSA
         attr_accessor :handle, :device
 
         def initialize(device = nil)
-          hw_params_pointer = MemoryPointer.new :pointer
+          hw_params_pointer = FFI::MemoryPointer.new :pointer
           ALSA::PCM::Native::hw_params_malloc hw_params_pointer        
           self.handle = hw_params_pointer.read_pointer
 
@@ -98,30 +97,30 @@ module ALSA
         end
 
         def device=(device)
-          try_to "initialize hardware parameter structure" do
+          ALSA::try_to "initialize hardware parameter structure" do
             ALSA::PCM::Native::hw_params_any device.handle, self.handle
           end
           @device = device
         end
 
         def access=(access)
-          try_to "set access type" do
+          ALSA::try_to "set access type" do
             ALSA::PCM::Native::hw_params_set_access self.device.handle, self.handle, access
           end
         end
 
         def channels=(channels)
-          try_to "set channel count : #{channels}" do
+          ALSA::try_to "set channel count : #{channels}" do
             ALSA::PCM::Native::hw_params_set_channels self.device.handle, self.handle, channels
           end
         end
 
         def sample_rate=(sample_rate)
-          try_to "set sample rate" do
-            rate = MemoryPointer.new(:int)
+          ALSA::try_to "set sample rate" do
+            rate = FFI::MemoryPointer.new(:int)
             rate.write_int(sample_rate)
 
-            dir = MemoryPointer.new(:int)
+            dir = FFI::MemoryPointer.new(:int)
             dir.write_int(0)
 
             error_code = ALSA::PCM::Native::hw_params_set_rate_near self.device.handle, self.handle, rate, dir
@@ -134,13 +133,13 @@ module ALSA
         end
 
         def sample_format=(sample_format)
-          try_to "set sample format" do
+          ALSA::try_to "set sample format" do
             ALSA::PCM::Native::hw_params_set_format self.device.handle, self.handle, sample_format
           end
         end
 
         def free
-          try_to "unallocate hw_params" do
+          ALSA::try_to "unallocate hw_params" do
             ALSA::PCM::Native::hw_params_free self.handle
           end
         end
