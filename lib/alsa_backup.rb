@@ -4,3 +4,6 @@ $:.unshift(File.dirname(__FILE__)) unless
 module AlsaBackup
   VERSION = '0.0.1'
 end
+
+require 'alsa_backup/recorder'
+
