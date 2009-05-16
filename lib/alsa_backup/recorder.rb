@@ -196,6 +196,7 @@ module Sndfile
     end
 
     def initialize(path, mode, info)
+      info = (Hash === info ? Info.new(info) : info)
       @handle = Sndfile::Native::open path, File.native_mode(mode), info.to_native
       if @handle.is_a?(FFI::NullPointer)
         raise "Not able to open output file " + self.error
@@ -230,6 +231,10 @@ module Sndfile
 
     # TODO add format
     attr_accessor :sample_rate, :channels
+
+    def initialize(attributes = {})
+      attributes.each_pair { |name, value| send("#{name}=", value) }
+    end
 
     def to_native
       info = Sndfile::Native::Info.new
@@ -281,21 +286,17 @@ module AlsaBackup
     def start
       sample_rate = 44100
 
-      file_info = Sndfile::Info.new
-      file_info.sample_rate = sample_rate
-      file_info.channels = 2
+      Sndfile::File.open("tmp/test.wav", "w", :sample_rate => 44100, :channels => 2) do |file|
+        ALSA::PCM::Capture.new.open("hw:0") do |capture|
+          capture.change_hardware_parameters do |hw_params|
+            hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
+            hw_params.sample_rate = 44100
+            hw_params.channels = 2
+            hw_params.sample_format = ALSA::PCM::Native::FORMAT_S16_LE
+          end
 
-      Sndfile::File.open("tmp/test.wav", "w", file_info) do |file|
-      ALSA::PCM::Capture.new.open("hw:0") do |capture|
-        capture.change_hardware_parameters do |hw_params|
-          hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
-          hw_params.sample_rate = 44100
-          hw_params.channels = 2
-          hw_params.sample_format = ALSA::PCM::Native::FORMAT_S16_LE
-        end
-
-        start = Time.now
-        capture.read do |buffer, frame_count|
+          start = Time.now
+          capture.read do |buffer, frame_count|
             file.write buffer, frame_count
             (Time.now - start) < 2
           end
