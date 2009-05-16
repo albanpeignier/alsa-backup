@@ -182,6 +182,65 @@ module ALSA
 end
 
 module Sndfile
+
+  class File
+
+    def self.open(path, mode, info)
+      file = self.new(path, mode, info)
+
+      begin
+        yield file
+      ensure
+        file.close
+      end
+    end
+
+    def initialize(path, mode, info)
+      @handle = Sndfile::Native::open path, File.native_mode(mode), info.to_native
+      if @handle.is_a?(FFI::NullPointer)
+        raise "Not able to open output file " + self.error
+      end
+    end
+
+    def write(buffer, frame_count)
+      unless Sndfile::Native::write_int(@handle, buffer, frame_count) == frame_count
+        raise self.error
+      end
+    end
+
+    def close
+      Sndfile::Native::close @handle
+    end
+
+    def error
+      Sndfile::Native::strerror @handle
+    end
+
+    def self.native_mode(mode)
+      case mode 
+      when "w": Sndfile::Native::MODE_WRITE
+      else
+        raise "Unknown mode: #{mode}"
+      end
+    end
+
+  end
+
+  class Info
+
+    # TODO add format
+    attr_accessor :sample_rate, :channels
+
+    def to_native
+      info = Sndfile::Native::Info.new
+      info[:samplerate] = self.sample_rate
+      info[:channels] = self.channels
+      info[:format] = (Sndfile::Native::Format::WAV | Sndfile::Native::Format::PCM_16)
+      info
+    end
+
+  end
+
   module Native
     extend FFI::Library
     ffi_lib "libsndfile.so"
@@ -222,16 +281,11 @@ module AlsaBackup
     def start
       sample_rate = 44100
 
-      info = Sndfile::Native::Info.new
-      info[:samplerate] = sample_rate
-      info[:channels] = 2
-      info[:format] = (Sndfile::Native::Format::WAV | Sndfile::Native::Format::PCM_16)
+      file_info = Sndfile::Info.new
+      file_info.sample_rate = sample_rate
+      file_info.channels = 2
 
-      file = Sndfile::Native::open "tmp/test.wav", Sndfile::Native::MODE_WRITE, info
-      if file.is_a?(FFI::NullPointer)
-        raise "Not able to open output file " + Sndfile::Native::strerror(file)
-      end
-
+      Sndfile::File.open("tmp/test.wav", "w", file_info) do |file|
       ALSA::PCM::Capture.new.open("hw:0") do |capture|
         capture.change_hardware_parameters do |hw_params|
           hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
@@ -242,15 +296,11 @@ module AlsaBackup
 
         start = Time.now
         capture.read do |buffer, frame_count|
-          unless Sndfile::Native::write_int(file, buffer, frame_count) == frame_count
-            raise Sndfile::Native::strerror file
+            file.write buffer, frame_count
+            (Time.now - start) < 2
           end
-
-          (Time.now - start) < 2
         end
       end
-
-      Sndfile::Native::close file
     end
     
   end
