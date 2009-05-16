@@ -229,19 +229,32 @@ module Sndfile
 
   class Info
 
-    # TODO add format
-    attr_accessor :sample_rate, :channels
+    attr_accessor :sample_rate, :channels, :format
 
     def initialize(attributes = {})
       attributes.each_pair { |name, value| send("#{name}=", value) }
     end
 
     def to_native
-      info = Sndfile::Native::Info.new
-      info[:samplerate] = self.sample_rate
-      info[:channels] = self.channels
-      info[:format] = (Sndfile::Native::Format::WAV | Sndfile::Native::Format::PCM_16)
-      info
+      Sndfile::Native::Info.new.tap do |native|
+        native[:samplerate] = self.sample_rate
+        native[:channels] = self.channels
+        native[:format] = self.native_format
+      end
+    end
+
+    def format=(format)
+      @format = Info.normalized_format(format)
+    end
+
+    def native_format
+      self.format.inject(0) do |native_format, format_part|
+        native_format | Sndfile::Native::Format.const_get(format_part.upcase)
+      end
+    end
+
+    def self.normalized_format(format)
+      Array(format).join(' ').downcase.scan(/[a-z0-9_]+/)      
     end
 
   end
@@ -286,7 +299,7 @@ module AlsaBackup
     def start
       sample_rate = 44100
 
-      Sndfile::File.open("tmp/test.wav", "w", :sample_rate => 44100, :channels => 2) do |file|
+      Sndfile::File.open("tmp/test.wav", "w", :sample_rate => 44100, :channels => 2, :format => "wav pcm_16") do |file|
         ALSA::PCM::Capture.new.open("hw:0") do |capture|
           capture.change_hardware_parameters do |hw_params|
             hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
