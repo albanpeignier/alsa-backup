@@ -48,4 +48,9 @@ describe AlsaBackup::CLI, "execute" do
     execute_cli :length => nil
   end
 
+  it "should execute specified config file" do
+    execute_cli :config => fixture_file('config_test.rb')
+    AlsaBackup.recorder.file.should == "config_test_ok"
+  end
+
 end

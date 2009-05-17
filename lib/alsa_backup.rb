@@ -8,6 +8,9 @@ module AlsaBackup
     @recorder ||= AlsaBackup::Recorder.new
   end
 
+  def self.config
+    yield self.recorder
+  end
 end
 
 require 'alsa_backup/recorder'

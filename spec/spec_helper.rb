@@ -12,3 +12,7 @@ require 'alsa_backup'
 def test_file(name = 'test.wav')
   File.dirname(__FILE__) + '/../tmp/' + name
 end
+
+def fixture_file(name)
+  File.dirname(__FILE__) + '/fixtures/' + name
+end
