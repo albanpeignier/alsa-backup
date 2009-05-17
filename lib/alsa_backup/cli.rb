@@ -21,6 +21,8 @@ module AlsaBackup
         opts.on("-f", "--file=FILE", String,
                 "This is a sample message.",
                 "For multiple lines, add more strings.") { |arg| options[:file] = arg }
+        opts.on("-l", "--length=LENGTH", String,
+                "Length in seconds") { |arg| options[:length] = arg }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
         opts.parse!(arguments)
@@ -31,9 +33,10 @@ module AlsaBackup
       end
 
       file = options[:file]
+      length = options[:length].to_i
 
       # do stuff
-      AlsaBackup::Recorder.new(file).start
+      AlsaBackup::Recorder.new(file).start(length)
     end
   end
 end

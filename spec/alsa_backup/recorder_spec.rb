@@ -12,7 +12,7 @@ describe AlsaBackup::Recorder do
   it "should not raise an error on start" do
     lambda do
       begin
-        @recorder.start 
+        @recorder.start(2)
       rescue Exception => e
         puts e.backtrace.join("\n")
         raise e

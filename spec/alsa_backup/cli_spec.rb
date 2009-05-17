@@ -13,7 +13,7 @@ describe AlsaBackup::CLI, "execute" do
   end
 
   def execute_cli
-    AlsaBackup::CLI.execute(@stdout_io, "--file=#{@file}")
+    AlsaBackup::CLI.execute(@stdout_io, "--file=#{@file}", "--length=2")
     @stdout_io.rewind
     @stdout = @stdout_io.read
   end
