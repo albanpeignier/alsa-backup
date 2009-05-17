@@ -52,6 +52,10 @@ module Sndfile
     attr_accessor :sample_rate, :channels, :format
 
     def initialize(attributes = {})
+      update_attributes(attributes)
+    end
+
+    def update_attributes(attributes)
       attributes.each_pair { |name, value| send("#{name}=", value) }
     end
 

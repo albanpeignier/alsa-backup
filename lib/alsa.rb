@@ -43,17 +43,22 @@ module ALSA
 
       def change_hardware_parameters
         hw_params = HwPameters.new(self)
+
         begin
           yield hw_params
-          self.hardware_parameters = hw_params
+
+          ALSA::try_to "set hw parameters" do
+            ALSA::PCM::Native::hw_params self.handle, hw_params.handle
+          end
         ensure
           hw_params.free
         end
       end
 
-      def hardware_parameters=(hw_params)
-        ALSA::try_to "set hw parameters" do
-          ALSA::PCM::Native::hw_params self.handle, hw_params.handle
+      def hardware_parameters=(attributes= {})
+        attributes = {:access => :rw_interleaved}.update(attributes)
+        change_hardware_parameters do |hw_params|
+          hw_params.update_attributes(attributes)
         end
       end
 
@@ -96,6 +101,10 @@ module ALSA
           self.device = device if device
         end
 
+        def update_attributes(attributes)
+          attributes.each_pair { |name, value| send("#{name}=", value) }
+        end
+
         def device=(device)
           ALSA::try_to "initialize hardware parameter structure" do
             ALSA::PCM::Native::hw_params_any device.handle, self.handle
@@ -105,7 +114,7 @@ module ALSA
 
         def access=(access)
           ALSA::try_to "set access type" do
-            ALSA::PCM::Native::hw_params_set_access self.device.handle, self.handle, access
+            ALSA::PCM::Native::hw_params_set_access self.device.handle, self.handle, ALSA::PCM::Native::Access.const_get(access.to_s.upcase)
           end
         end
 
@@ -134,7 +143,7 @@ module ALSA
 
         def sample_format=(sample_format)
           ALSA::try_to "set sample format" do
-            ALSA::PCM::Native::hw_params_set_format self.device.handle, self.handle, sample_format
+            ALSA::PCM::Native::hw_params_set_format self.device.handle, self.handle, ALSA::PCM::Native::Format.const_get(sample_format.to_s.upcase)
           end
         end
 
@@ -166,7 +175,14 @@ module ALSA
       attach_function :hw_params, :snd_pcm_hw_params, [ :pointer, :pointer ], :int
       attach_function :hw_params_any, :snd_pcm_hw_params_any, [:pointer, :pointer], :int
 
-      ACCESS_RW_INTERLEAVED = 3
+      module Access
+        MMAP_INTERLEAVED = 0
+        MMAP_NONINTERLEAVED = 1
+        MMAP_COMPLEX = 2
+        RW_INTERLEAVED = 3
+        RW_NONINTERLEAVED = 4
+      end
+
       attach_function :hw_params_set_access, :snd_pcm_hw_params_set_access, [ :pointer, :pointer, :int ], :int
 
       module Format
