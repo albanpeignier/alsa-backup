@@ -16,3 +16,6 @@ end
 def fixture_file(name)
   File.dirname(__FILE__) + '/fixtures/' + name
 end
+
+ALSA::logger = AlsaBackup.logger = 
+  Logger.new(File.dirname(__FILE__) + '/../log/test.log') 

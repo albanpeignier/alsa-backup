@@ -26,6 +26,9 @@ module AlsaBackup
           end
         end
       end
+    rescue Exception => e
+      AlsaBackup.error(e)
+      raise e
     ensure
       @sndfile.close if @sndfile
     end
@@ -49,7 +52,7 @@ module AlsaBackup
 
       unless @sndfile and @sndfile.path == target_file
         @sndfile.close if @sndfile
-        puts "open sndfile #{target_file}"
+        AlsaBackup.logger.info "new file #{target_file}"
         @sndfile = Sndfile::File.new(target_file, "w", self.format(:format => "wav pcm_16"))
       end
       @sndfile

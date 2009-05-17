@@ -1,10 +1,23 @@
 require 'rubygems'
 require 'ffi'
 
+require 'logger'
+
 module ALSA
 
+  def self.logger
+    unless @logger
+      @logger = Logger.new(STDERR)
+      @logger.level = Logger::WARN
+    end
+
+    @logger
+  end
+
+  def self.logger=(logger); @logger = logger; end
+
   def self.try_to(message, &block)
-    puts message
+    logger.debug('alsa') { message }
     if (response = yield) < 0
       raise "cannot #{message} (#{ALSA::Native::strerror(response)})"
     else
