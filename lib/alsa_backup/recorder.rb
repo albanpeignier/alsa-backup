@@ -15,11 +15,11 @@ module AlsaBackup
       self.sndfile
 
       ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le)) do |capture|
-        frames_to_read = format[:sample_rate] * 2
+        frames_to_record = format[:sample_rate] * 2
 
         capture.read do |buffer, frame_count|
           self.sndfile.write buffer, frame_count
-          (frames_to_read -= frame_count) > 0
+          (frames_to_record -= frame_count) > 0
         end
       end
     ensure
