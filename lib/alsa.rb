@@ -42,7 +42,7 @@ module ALSA
       end
 
       def change_hardware_parameters
-        hw_params = HwPameters.new(self).default_for_device
+        hw_params = HwParameters.new(self).default_for_device
 
         begin
           yield hw_params
@@ -56,7 +56,7 @@ module ALSA
       end
 
       def hardware_parameters
-        HwPameters.new(self).current_for_device
+        HwParameters.new(self).current_for_device
       end
 
       def hardware_parameters=(attributes= {})
@@ -90,7 +90,7 @@ module ALSA
         end
       end
 
-      class HwPameters
+      class HwParameters
 
         attr_accessor :handle, :device
 
