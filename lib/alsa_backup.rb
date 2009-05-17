@@ -5,9 +5,5 @@ module AlsaBackup
   VERSION = '0.0.1'
 end
 
-class Hash
-  alias_method :with, :merge
-end
-
 require 'alsa_backup/recorder'
 

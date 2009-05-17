@@ -25,18 +25,18 @@ module ALSA
 
       attr_accessor :handle
 
-      def self.open(device, hardware_attributes = {})
-        Capture.new.open(device, hardware_attributes)
+      def self.open(device, hardware_attributes = {}, &block)
+        Capture.new.open(device, hardware_attributes, &block)
       end
 
-      def open(device, hardware_attributes = {})
+      def open(device, hardware_attributes = {}, &block)
         capture_handle = FFI::MemoryPointer.new :pointer
         ALSA::try_to "open audio device #{device}" do
           ALSA::PCM::Native::open capture_handle, device, ALSA::PCM::Native::STREAM_CAPTURE, ALSA::PCM::Native::BLOCK
         end
         self.handle = capture_handle.read_pointer
 
-        hardware_parameters = hardware_attributes
+        self.hardware_parameters=hardware_attributes
 
         if block_given?
           begin

@@ -6,13 +6,14 @@ require 'alsa_backup/recorder'
 describe AlsaBackup::CLI, "execute" do
   before(:each) do
     @stdout_io = StringIO.new
+    @file = File.dirname(__FILE__) + '/../../tmp/test.wav'
 
-    @recorder = AlsaBackup::Recorder.new
+    @recorder = AlsaBackup::Recorder.new(@file)
     AlsaBackup::Recorder.stub!(:new).and_return(@recorder)
   end
 
   def execute_cli
-    AlsaBackup::CLI.execute(@stdout_io, [])
+    AlsaBackup::CLI.execute(@stdout_io, "--file=#{@file}")
     @stdout_io.rewind
     @stdout = @stdout_io.read
   end

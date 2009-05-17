@@ -5,6 +5,8 @@ module Sndfile
 
   class File
 
+    attr_reader :path
+
     def self.open(path, mode, info)
       file = self.new(path, mode, info)
 
@@ -21,6 +23,7 @@ module Sndfile
       if @handle.is_a?(FFI::NullPointer)
         raise "Not able to open output file " + self.error
       end
+      @path = path
     end
 
     def write(buffer, frame_count)

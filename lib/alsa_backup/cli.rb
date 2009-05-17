@@ -4,13 +4,10 @@ require "alsa_backup/recorder"
 
 module AlsaBackup
   class CLI
-    def self.execute(stdout, arguments=[])
-      # NOTE: the option -p/--path= is given as an example, and should be replaced in your application.
-
+    def self.execute(stdout, *arguments)
       options = {
-        :path     => '~'
       }
-      mandatory_options = %w(  )
+      mandatory_options = %w(file)
 
       parser = OptionParser.new do |opts|
         opts.banner = <<-BANNER.gsub(/^          /,'')
@@ -21,10 +18,9 @@ module AlsaBackup
           Options are:
         BANNER
         opts.separator ""
-        opts.on("-p", "--path=PATH", String,
+        opts.on("-f", "--file=FILE", String,
                 "This is a sample message.",
-                "For multiple lines, add more strings.",
-                "Default: ~") { |arg| options[:path] = arg }
+                "For multiple lines, add more strings.") { |arg| options[:file] = arg }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
         opts.parse!(arguments)
@@ -34,10 +30,10 @@ module AlsaBackup
         end
       end
 
-      path = options[:path]
+      file = options[:file]
 
       # do stuff
-      AlsaBackup::Recorder.new.start
+      AlsaBackup::Recorder.new(file).start
     end
   end
 end
