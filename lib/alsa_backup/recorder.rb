@@ -1,6 +1,8 @@
 require 'alsa'
 require 'sndfile'
 
+require 'fileutils'
+
 module AlsaBackup
   class Recorder
 
@@ -27,7 +29,7 @@ module AlsaBackup
         end
       end
     rescue Exception => e
-      AlsaBackup.error(e)
+      AlsaBackup.logger.error(e)
       raise e
     ensure
       @sndfile.close if @sndfile
@@ -53,6 +55,8 @@ module AlsaBackup
       unless @sndfile and @sndfile.path == target_file
         @sndfile.close if @sndfile
         AlsaBackup.logger.info "new file #{target_file}"
+
+        FileUtils.mkdir_p File.dirname(target_file)
         @sndfile = Sndfile::File.new(target_file, "w", self.format(:format => "wav pcm_16"))
       end
       @sndfile
