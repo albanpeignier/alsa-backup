@@ -1,6 +1,6 @@
 require 'optparse'
 
-require "alsa_backup/recorder"
+require 'alsa_backup'
 
 module AlsaBackup
   class CLI
@@ -32,11 +32,10 @@ module AlsaBackup
         end
       end
 
-      file = options[:file]
-      length = options[:length].to_i
-
-      # do stuff
-      AlsaBackup::Recorder.new(file).start(length)
+      AlsaBackup.recorder.file = options[:file]
+      
+      length = options[:length].to_i if options[:length]
+      AlsaBackup.recorder.start(length)
     end
   end
 end
