@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
-require 'alsa_backup/recorder'
+require 'sndfile'
 
 describe Sndfile::Info do
 

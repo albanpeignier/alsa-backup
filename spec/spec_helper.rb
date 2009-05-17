@@ -8,3 +8,7 @@ end
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 require 'alsa_backup'
+
+def test_file(name = 'test.wav')
+  File.dirname(__FILE__) + '/../tmp/' + name
+end

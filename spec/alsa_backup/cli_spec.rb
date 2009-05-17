@@ -1,12 +1,11 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
 require 'alsa_backup/cli'
-require 'alsa_backup/recorder'
 
 describe AlsaBackup::CLI, "execute" do
   before(:each) do
     @stdout_io = StringIO.new
-    @file = File.dirname(__FILE__) + '/../../tmp/test.wav'
+    @file = test_file
 
     @recorder = AlsaBackup::Recorder.new(@file)
     AlsaBackup::Recorder.stub!(:new).and_return(@recorder)

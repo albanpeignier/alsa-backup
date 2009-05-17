@@ -5,7 +5,7 @@ require 'alsa_backup/recorder'
 describe AlsaBackup::Recorder do
 
   before(:each) do
-    @file = File.dirname(__FILE__) + '/../../tmp/test.wav'
+    @file = test_file
     @recorder = AlsaBackup::Recorder.new(@file)
   end
 
