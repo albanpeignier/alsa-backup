@@ -6,7 +6,7 @@ module ALSA
   def self.try_to(message, &block)
     puts message
     if (response = yield) < 0
-      raise "cannot #{message} (#{ALSA::Native::strerror(err)})"
+      raise "cannot #{message} (#{ALSA::Native::strerror(response)})"
     else
       response
     end
@@ -42,7 +42,7 @@ module ALSA
       end
 
       def change_hardware_parameters
-        hw_params = HwPameters.new(self)
+        hw_params = HwPameters.new(self).default_for_device
 
         begin
           yield hw_params
@@ -55,6 +55,10 @@ module ALSA
         end
       end
 
+      def hardware_parameters
+        HwPameters.new(self).current_for_device
+      end
+
       def hardware_parameters=(attributes= {})
         attributes = {:access => :rw_interleaved}.update(attributes)
         change_hardware_parameters do |hw_params|
@@ -63,11 +67,8 @@ module ALSA
       end
 
       def read
-        # TODO use real data to calculate buffer size
-        frame_count = 44100
-        format = ALSA::PCM::Native::Format::S16_LE
-        
-        buffer = FFI::MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
+        frame_count = hardware_parameters.sample_rate
+        buffer = FFI::MemoryPointer.new(hardware_parameters.buffer_size_for(frame_count))
 
         continue = true
         while continue
@@ -95,6 +96,7 @@ module ALSA
 
         def initialize(device = nil)
           hw_params_pointer = FFI::MemoryPointer.new :pointer
+
           ALSA::PCM::Native::hw_params_malloc hw_params_pointer        
           self.handle = hw_params_pointer.read_pointer
 
@@ -105,11 +107,18 @@ module ALSA
           attributes.each_pair { |name, value| send("#{name}=", value) }
         end
 
-        def device=(device)
+        def default_for_device
           ALSA::try_to "initialize hardware parameter structure" do
             ALSA::PCM::Native::hw_params_any device.handle, self.handle
           end
-          @device = device
+          self
+        end
+
+        def current_for_device
+          ALSA::try_to "retrieve current hardware parameters" do
+            ALSA::PCM::Native::hw_params_current device.handle, self.handle
+          end
+          self
         end
 
         def access=(access)
@@ -141,10 +150,55 @@ module ALSA
           end
         end
 
+        def sample_rate
+          rate = nil
+          ALSA::try_to "get sample rate" do
+            rate_pointer = FFI::MemoryPointer.new(:int)
+            dir_pointer = FFI::MemoryPointer.new(:int)
+            dir_pointer.write_int(0)
+
+            error_code = ALSA::PCM::Native::hw_params_get_rate self.handle, rate_pointer, dir_pointer
+
+            rate = rate_pointer.read_int
+
+            rate_pointer.free
+            dir_pointer.free
+
+            error_code
+          end
+          rate
+        end
+
         def sample_format=(sample_format)
           ALSA::try_to "set sample format" do
             ALSA::PCM::Native::hw_params_set_format self.device.handle, self.handle, ALSA::PCM::Native::Format.const_get(sample_format.to_s.upcase)
           end
+        end
+
+        def sample_format
+          format = nil
+          FFI::MemoryPointer.new(:int) do |format_pointer|
+            ALSA::try_to "get sample format" do
+              ALSA::PCM::Native::hw_params_get_format self.handle, format_pointer
+            end
+            format = format_pointer.read_int
+          end
+          format
+        end
+
+        def channels
+          channels = nil
+          FFI::MemoryPointer.new(:int) do |channels_pointer|
+            ALSA::try_to "get channels" do
+              ALSA::PCM::Native::hw_params_get_channels self.handle, channels_pointer
+            end
+            channels = channels_pointer.read_int
+          end
+          channels
+        end
+
+        def buffer_size_for(frame_count)
+          ALSA::PCM::Native::format_size(self.sample_format, frame_count) * self.channels
         end
 
         def free
@@ -174,6 +228,8 @@ module ALSA
 
       attach_function :hw_params, :snd_pcm_hw_params, [ :pointer, :pointer ], :int
       attach_function :hw_params_any, :snd_pcm_hw_params_any, [:pointer, :pointer], :int
+      attach_function :hw_params_current, :snd_pcm_hw_params_current, [ :pointer, :pointer ], :int
+
 
       module Access
         MMAP_INTERLEAVED = 0
@@ -190,8 +246,11 @@ module ALSA
       end
       
       attach_function :hw_params_set_format, :snd_pcm_hw_params_set_format, [ :pointer, :pointer, :int ], :int
+      attach_function :hw_params_get_format, :snd_pcm_hw_params_get_format, [ :pointer, :pointer ], :int
+      attach_function :hw_params_get_rate, :snd_pcm_hw_params_get_rate, [ :pointer, :pointer, :pointer ], :int
       attach_function :hw_params_set_rate_near, :snd_pcm_hw_params_set_rate_near, [ :pointer, :pointer, :pointer, :pointer ], :int
       attach_function :hw_params_set_channels, :snd_pcm_hw_params_set_channels, [ :pointer, :pointer, :uint ], :int
+      attach_function :hw_params_get_channels, :snd_pcm_hw_params_get_format, [ :pointer, :pointer ], :int
       attach_function :hw_params_set_periods, :snd_pcm_hw_params_set_periods, [ :pointer, :pointer, :uint, :int ], :int
 
       attach_function :format_size, :snd_pcm_format_size, [ :int, :uint ], :int
