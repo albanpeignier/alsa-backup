@@ -60,7 +60,7 @@ module ALSA
       def read
         # TODO use real data to calculate buffer size
         frame_count = 44100
-        format = ALSA::PCM::Native::FORMAT_S16_LE
+        format = ALSA::PCM::Native::Format::S16_LE
         
         buffer = FFI::MemoryPointer.new(ALSA::PCM::Native::format_size(format, frame_count) * 2)
 
@@ -169,7 +169,10 @@ module ALSA
       ACCESS_RW_INTERLEAVED = 3
       attach_function :hw_params_set_access, :snd_pcm_hw_params_set_access, [ :pointer, :pointer, :int ], :int
 
-      FORMAT_S16_LE = 2
+      module Format
+        S16_LE = 2
+      end
+      
       attach_function :hw_params_set_format, :snd_pcm_hw_params_set_format, [ :pointer, :pointer, :int ], :int
       attach_function :hw_params_set_rate_near, :snd_pcm_hw_params_set_rate_near, [ :pointer, :pointer, :pointer, :pointer ], :int
       attach_function :hw_params_set_channels, :snd_pcm_hw_params_set_channels, [ :pointer, :pointer, :uint ], :int

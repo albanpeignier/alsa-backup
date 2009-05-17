@@ -13,7 +13,7 @@ module AlsaBackup
             hw_params.access = ALSA::PCM::Native::ACCESS_RW_INTERLEAVED
             hw_params.sample_rate = 44100
             hw_params.channels = 2
-            hw_params.sample_format = ALSA::PCM::Native::FORMAT_S16_LE
+            hw_params.sample_format = ALSA::PCM::Native::Format::S16_LE
           end
 
           start = Time.now
