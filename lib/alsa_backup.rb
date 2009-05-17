@@ -1,6 +1,12 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
+begin
+  require 'rubygems'
+rescue LoadError
+end
+
+require 'activesupport'
 require 'logger'
 
 module AlsaBackup
@@ -27,5 +33,16 @@ module AlsaBackup
 
 end
 
+class Time
+
+  def floor(attribute, modulo)
+    actual = self.send(attribute)
+    self.change(attribute => actual - actual%modulo)
+  end
+
+end
+
 require 'alsa_backup/recorder'
+
+
 
