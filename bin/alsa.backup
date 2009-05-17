@@ -5,6 +5,7 @@
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/alsa_backup")
 
-require "alsa_backup/cli"
+require 'alsa_backup'
+require 'alsa_backup/cli'
 
 AlsaBackup::CLI.execute(STDOUT, ARGV)
