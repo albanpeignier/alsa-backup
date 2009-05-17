@@ -1,17 +1,14 @@
 require 'optparse'
 
-require 'alsa_backup'
-
 module AlsaBackup
   class CLI
     def self.execute(stdout, *arguments)
-      options = {
-      }
-      mandatory_options = %w(file)
+      options = {}
+      mandatory_options = %w()
 
       parser = OptionParser.new do |opts|
         opts.banner = <<-BANNER.gsub(/^          /,'')
-          This application is wonderful because...
+          Alsa.Backup : continuous recording with alsa
 
           Usage: #{File.basename($0)} [options]
 
@@ -19,8 +16,7 @@ module AlsaBackup
         BANNER
         opts.separator ""
         opts.on("-f", "--file=FILE", String,
-                "This is a sample message.",
-                "For multiple lines, add more strings.") { |arg| options[:file] = arg }
+                "Recording file") { |arg| options[:file] = arg }
         opts.on("-l", "--length=LENGTH", String,
                 "Length in seconds") { |arg| options[:length] = arg }
         opts.on("-c", "--config=CONFIG", String,
@@ -34,9 +30,9 @@ module AlsaBackup
         end
       end
 
-      AlsaBackup.recorder.file = options[:file]
-
       require File.expand_path(options[:config]) if options[:config]
+
+      AlsaBackup.recorder.file = options[:file] if options[:file]
       
       length = options[:length].to_i if options[:length]
       AlsaBackup.recorder.start(length)

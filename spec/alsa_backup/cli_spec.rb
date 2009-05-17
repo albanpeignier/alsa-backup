@@ -49,8 +49,14 @@ describe AlsaBackup::CLI, "execute" do
   end
 
   it "should execute specified config file" do
-    execute_cli :config => fixture_file('config_test.rb')
+    execute_cli :config => fixture_file('config_test.rb'), :file => nil
     AlsaBackup.recorder.file.should == "config_test_ok"
+  end
+
+  it "should override config file values with command line arguments" do
+    argument_file = "dummy"
+    execute_cli :config => fixture_file('config_test.rb'), :file => argument_file
+    AlsaBackup.recorder.file.should == argument_file
   end
 
 end
