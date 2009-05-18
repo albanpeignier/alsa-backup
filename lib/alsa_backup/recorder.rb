@@ -6,11 +6,12 @@ require 'fileutils'
 module AlsaBackup
   class Recorder
 
-    def initialize(file = nil)
+    def initialize(file = "record.wav")
       @file = file
+      @directory = "."
     end
 
-    attr_accessor :file
+    attr_accessor :file, :directory
 
     def start(seconds_to_record = nil)
       frames_to_record = format[:sample_rate] * seconds_to_record if seconds_to_record
@@ -44,12 +45,16 @@ module AlsaBackup
       end
     end
 
+    def target_file
+      File.join self.directory, self.file
+    end
+
     def format(additional_parameters = {})
       {:sample_rate => 44100, :channels => 2}.merge(additional_parameters)
     end
 
     def sndfile
-      target_file = self.file
+      target_file = self.target_file
       raise "no recording file" unless target_file
 
       unless @sndfile and @sndfile.path == target_file
