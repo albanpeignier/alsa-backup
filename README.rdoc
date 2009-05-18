@@ -32,7 +32,43 @@ will load the specified configuration
 
 == CONFIGURATION:
 
-See config.sample for the moment.
+The configuration file is a Ruby file. This piece of code can
+configurate the AlsaBacup recorder :
+
+  AlsaBackup.config do |recorder|
+    # configure recorder here :
+    recorder.file = "record.wav"
+  end
+
+=== Recorder File 
+
+The recorder file can be specified as a simple string :
+
+  recorder.file = "record.wav"
+
+The recorder file can be specified by a Proc which returns the string :
+
+  recorder.file = Proc.new {
+    Time.now.strftime("%Y/%m-%b/%d-%a/%Hh.wav")
+  }
+
+will use the current time to create file names like these :
+
+  2009/05-May/17-Sun/19h.wav
+  2009/05-May/17-Sun/20h.wav
+
+To use different files every 15 minutes :
+
+  recorder.file = Proc.new {
+    Time.now.floor(:min, 15).strftime("%Y/%m-%b/%d-%a/%Hh%M.wav")
+  }
+
+will create files like these : 
+
+  2009/05-May/17-Sun/19h00.wav
+  2009/05-May/17-Sun/19h15.wav
+
+See config.sample.
 
 == REQUIREMENTS:
 
@@ -41,16 +77,14 @@ See config.sample for the moment.
 
 == INSTALL:
 
-* sudo apt-get install libasound2 libsndfile1
-* sudo gem install ruby-ffi
-
-* sudo gem install --source http://gems.github.com albanpeignier-alsa-backup
+  sudo apt-get install libasound2 libsndfile1
+  sudo gem install --source http://gems.github.com albanpeignier-alsa-backup
 
 == LICENSE:
 
 (The MIT License)
 
-Copyright (c) 2009 FIXME Alban Peignier 
+Copyright (c) 2009 Alban Peignier 
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
