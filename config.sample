@@ -1,0 +1,43 @@
+#
+# Config sample for Alsa.Backup
+#
+# Usage: 
+#   alsa-backup --config /path/to/this/file
+#
+
+#
+# To use syslog
+#
+#require 'syslog_logger'
+#AlsaBackup.logger = SyslogLogger.new('alsa.backup').tap do |logger|
+#  logger.level = Logger::INFO
+#end
+
+AlsaBackup.logger.info("load config #{__FILE__}")
+
+AlsaBackup.config do |recorder|
+  #
+  # To use files named like this :
+  # - 2009/05-May/17-Sun/19h.wav
+  # - 2009/05-May/17-Sun/20h.wav
+  #
+  #recorder.file = Proc.new {
+  #  Time.now.strftime("%Y/%m-%b/%d-%a/%Hh.wav")
+  #}
+
+  #
+  # To use files named like this :
+  # - 2009/05-May/17-Sun/19h00.wav
+  # - 2009/05-May/17-Sun/19h15.wav
+  #
+  #recorder.file = Proc.new {
+  #  Time.now.floor(:min, 15).strftime("%Y/%m-%b/%d-%a/%Hh%M.wav")
+  #}
+
+  #
+  # Define where the files are created
+  #
+  #recorder.directory = "/var/lib/alsa.backup"
+end
+
+
