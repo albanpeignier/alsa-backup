@@ -4,7 +4,7 @@ require File.dirname(__FILE__) + '/lib/alsa_backup'
 
 # Generate all the Rake tasks
 # Run 'rake -T' to see list of generated tasks (from gem root directory)
-$hoe = Hoe.new('alsa_backup', AlsaBackup::VERSION) do |p|
+$hoe = Hoe.new('alsa-backup', AlsaBackup::VERSION) do |p|
   p.developer('Alban Peignier', 'alban.peignier@free.fr')
   p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
   p.rubyforge_name       = p.name # TODO this is default value
@@ -24,5 +24,4 @@ end
 require 'newgem/tasks' # load /tasks/*.rake
 Dir['tasks/**/*.rake'].each { |t| load t }
 
-# TODO - want other tests/tasks run by default? Add them to the list
-# task :default => [:spec, :features]
+task :default => :spec
