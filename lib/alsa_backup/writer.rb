@@ -60,7 +60,7 @@ module AlsaBackup
 
       unless @sndfile and @sndfile.path == target_file
         @sndfile.close if @sndfile
-        AlsaBackup.logger.info "new file #{target_file}"
+        AlsaBackup.logger.info{"new file #{File.expand_path target_file}"}
 
         FileUtils.mkdir_p File.dirname(target_file)
         @sndfile = Sndfile::File.new(target_file, "w", self.format)
