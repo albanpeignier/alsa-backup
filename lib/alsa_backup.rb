@@ -10,7 +10,7 @@ require 'activesupport'
 require 'logger'
 
 module AlsaBackup
-  VERSION = '0.0.1'
+  VERSION = '0.0.2'
 
   def self.recorder
     @recorder ||= AlsaBackup::Recorder.new

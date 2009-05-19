@@ -1,4 +1,7 @@
+== 0.0.2 2009-05-19
+
+* Improve capture by support partial reads and recovering errors
+
 == 0.0.1 2009-05-14
 
-* 1 major enhancement:
-  * Initial release
+* Initial release
