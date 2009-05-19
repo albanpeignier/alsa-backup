@@ -86,7 +86,7 @@ module ALSA
       end
 
       def read
-        frame_count = hardware_parameters.sample_rate
+        frame_count = hardware_parameters.sample_rate / 2
         buffer = FFI::MemoryPointer.new(hardware_parameters.buffer_size_for(frame_count))
 
         continue = true

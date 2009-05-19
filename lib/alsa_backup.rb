@@ -42,6 +42,8 @@ class Time
 
 end
 
+require 'alsa_backup/length_controller'
+require 'alsa_backup/writer'
 require 'alsa_backup/recorder'
 
 

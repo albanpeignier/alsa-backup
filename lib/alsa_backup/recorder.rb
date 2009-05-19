@@ -1,71 +1,44 @@
 require 'alsa'
-require 'sndfile'
-
-require 'fileutils'
 
 module AlsaBackup
   class Recorder
 
     def initialize(file = "record.wav")
-      @file = file
-      @directory = "."
+      @file = File.basename(file)
+      @directory = File.dirname(file)
     end
 
     attr_accessor :file, :directory
 
     def start(seconds_to_record = nil)
-      frames_to_record = format[:sample_rate] * seconds_to_record if seconds_to_record
+      length_controller = self.length_controller(seconds_to_record)
 
-      # prepare sndfile
-      self.sndfile
-
-      ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le)) do |capture|
-        capture.read do |buffer, frame_count|
-          self.sndfile.write buffer, frame_count
-          if frames_to_record
-            (frames_to_record -= frame_count) > 0
-          else
-            true
+      Writer.open(directory, file, format(:format => "wav pcm_16")) do |writer|
+        ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le)) do |capture|
+          capture.read do |buffer, frame_count|
+            writer.write buffer, frame_count
+            length_controller.continue_after? frame_count
           end
         end
       end
     rescue Exception => e
       AlsaBackup.logger.error(e)
+      AlsaBackup.logger.error(e.backtrace.join("\n"))
       raise e
-    ensure
-      @sndfile.close if @sndfile
-    end
-
-    def file
-      case @file
-      when Proc
-        @file.call
-      else
-        @file
-      end
-    end
-
-    def target_file
-      File.join self.directory, self.file
     end
 
     def format(additional_parameters = {})
       {:sample_rate => 44100, :channels => 2}.merge(additional_parameters)
     end
 
-    def sndfile
-      target_file = self.target_file
-      raise "no recording file" unless target_file
-
-      unless @sndfile and @sndfile.path == target_file
-        @sndfile.close if @sndfile
-        AlsaBackup.logger.info "new file #{target_file}"
-
-        FileUtils.mkdir_p File.dirname(target_file)
-        @sndfile = Sndfile::File.new(target_file, "w", self.format(:format => "wav pcm_16"))
+    def length_controller(seconds_to_record)
+      if seconds_to_record
+        AlsaBackup::LengthController::FrameCount.new format[:sample_rate] * seconds_to_record 
+      else
+        AlsaBackup::LengthController::Loop.new
       end
-      @sndfile
     end
-    
+
   end
+
 end
