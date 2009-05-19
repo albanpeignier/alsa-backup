@@ -18,11 +18,15 @@ module ALSA
 
   def self.try_to(message, &block)
     logger.debug('alsa') { message }
-    if (response = yield) < 0
+    if error_code?(response = yield)
       raise "cannot #{message} (#{ALSA::Native::strerror(response)})"
     else
       response
     end
+  end
+
+  def self.error_code?(response)
+    response < 0
   end
 
   module Native
@@ -77,6 +81,7 @@ module ALSA
       def hardware_parameters
         HwParameters.new(self).current_for_device
       end
+      alias_method :hw_params, :hardware_parameters
 
       def hardware_parameters=(attributes= {})
         attributes = {:access => :rw_interleaved}.update(attributes)
@@ -86,21 +91,33 @@ module ALSA
       end
 
       def read
-        frame_count = hardware_parameters.sample_rate / 2
-        buffer = FFI::MemoryPointer.new(hardware_parameters.buffer_size_for(frame_count))
+        frame_count = hw_params.sample_rate / 2
+        
+        FFI::MemoryPointer.new(:char, hw_params.buffer_size_for(frame_count)) do |buffer|
+          begin
+            read_buffer buffer, frame_count
+          end while yield buffer, frame_count
+        end
+      end
 
-        continue = true
-        while continue
-          read_count = ALSA::try_to "read from audio interface" do
-            ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
+      def read_buffer(buffer, frame_count)
+        read_count = ALSA::try_to "read from audio interface" do
+          response = ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
+          if error_code?(response)
+            ALSA.logger.debug('alsa') { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
+            ALSA::PCM::Native::pcm_recover(self.handle, response, 1)
+          else
+            response
           end
-
-          raise "can't read expected frame count (#{read_count}/#{frame_count})" unless read_count == frame_count
-          
-          continue = yield buffer, read_count
         end
 
-        buffer.free
+        missing_frame_count = frame_count - read_count
+        if missing_frame_count > 0
+          ALSA.logger.debug('alsa') { "re-read missing frame count: #{missing_frame_count}"}
+          read_buffer_size = hw_params.buffer_size_for(read_count)
+          # buffer[read_buffer_size] doesn't return a MemoryPointer
+          read_buffer(buffer + read_buffer_size, missing_frame_count)
+        end
       end
 
       def close
@@ -241,6 +258,8 @@ module ALSA
       attach_function :close, :snd_pcm_close, [:pointer], :int
 
       attach_function :readi, :snd_pcm_readi, [ :pointer, :pointer, :ulong ], :long
+
+      attach_function :pcm_recover, :snd_pcm_recover, [ :pointer, :int, :int ], :int
 
       attach_function :hw_params_malloc, :snd_pcm_hw_params_malloc, [:pointer], :int
       attach_function :hw_params_free, :snd_pcm_hw_params_free, [:pointer], :int
