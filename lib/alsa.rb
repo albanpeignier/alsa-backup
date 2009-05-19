@@ -18,15 +18,11 @@ module ALSA
 
   def self.try_to(message, &block)
     logger.debug('alsa') { message }
-    if error_code?(response = yield)
+    if ALSA::Native::error_code?(response = yield)
       raise "cannot #{message} (#{ALSA::Native::strerror(response)})"
     else
       response
     end
-  end
-
-  def self.error_code?(response)
-    response < 0
   end
 
   module Native
@@ -34,6 +30,10 @@ module ALSA
     ffi_lib "libasound.so"
 
     attach_function :strerror, :snd_strerror, [:int], :string
+
+    def self.error_code?(response)
+      response < 0
+    end
   end
 
   module PCM
@@ -103,7 +103,7 @@ module ALSA
       def read_buffer(buffer, frame_count)
         read_count = ALSA::try_to "read from audio interface" do
           response = ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
-          if error_code?(response)
+          if ALSA::Native::error_code?(response)
             ALSA.logger.debug('alsa') { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
             ALSA::PCM::Native::pcm_recover(self.handle, response, 1)
           else
