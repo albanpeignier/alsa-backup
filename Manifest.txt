@@ -14,7 +14,6 @@ lib/alsa_backup/length_controller.rb
 lib/alsa_backup/recorder.rb
 lib/alsa_backup/writer.rb
 lib/sndfile.rb
-log/test.log
 refs/alsa-record-example.rb
 refs/pcm_wrap.rb
 refs/sndfile-make-sine.rb
