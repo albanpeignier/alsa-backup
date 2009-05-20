@@ -33,15 +33,7 @@ module AlsaBackup
 
 end
 
-class Time
-
-  def floor(attribute, modulo)
-    actual = self.send(attribute)
-    self.change(attribute => actual - actual%modulo)
-  end
-
-end
-
+require 'alsa_backup/core_ext'
 require 'alsa_backup/length_controller'
 require 'alsa_backup/writer'
 require 'alsa_backup/recorder'
