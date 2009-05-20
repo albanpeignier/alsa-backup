@@ -37,7 +37,10 @@ module AlsaBackup
     end
 
     def close
-      @sndfile.close if @sndfile
+      if @sndfile
+        AlsaBackup.logger.info('close current file')
+        @sndfile.close 
+      end
       @sndfile = nil
     end
 

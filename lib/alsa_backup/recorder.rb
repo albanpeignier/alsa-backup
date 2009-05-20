@@ -21,9 +21,11 @@ module AlsaBackup
           end
         end
       end
+    rescue Interrupt
+      AlsaBackup.logger.debug('recorder interrupted')      
     rescue Exception => e
       AlsaBackup.logger.error(e)
-      AlsaBackup.logger.error(e.backtrace.join("\n"))
+      AlsaBackup.logger.debug { e.backtrace.join("\n") }
       raise e
     end
 
