@@ -1,3 +1,8 @@
+== 0.0.3
+
+* Support --pidfile option
+* Support --background to daemonize process
+
 == 0.0.2 2009-05-19
 
 * Improve capture by support partial reads and recovering errors

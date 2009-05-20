@@ -1,4 +1,5 @@
 require 'optparse'
+require 'daemons'
 
 module AlsaBackup
   class CLI
@@ -25,6 +26,8 @@ module AlsaBackup
                 "Configuration file") { |arg| options[:config] = arg }
         opts.on("-p", "--pid=PID_FILE", String,
                 "File to write the process pid") { |arg| options[:pid] = arg }
+        opts.on("-b", "--background", nil,
+                "Daemonize the process") { |arg| options[:daemonize] = true }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
         opts.parse!(arguments)
@@ -36,13 +39,18 @@ module AlsaBackup
 
       load File.expand_path(options[:config]) if options[:config]
 
-      File.write(options[:pid], $$) if options[:pid]
-
       AlsaBackup.recorder.file = options[:file] if options[:file]
       AlsaBackup.recorder.directory = options[:directory] if options[:directory]
+
+      pid_file = File.expand_path(options[:pid]) if options[:pid]
+
+      Daemonize.daemonize(nil, "alsa.backup") if options[:daemonize]
+      File.write(pid_file, $$) if pid_file
       
       length = options[:length].to_i if options[:length]
       AlsaBackup.recorder.start(length)
+    rescue Exception => e
+      AlsaBackup.logger.fatal(e)
     end
   end
 end

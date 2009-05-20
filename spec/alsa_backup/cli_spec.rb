@@ -15,7 +15,12 @@ describe AlsaBackup::CLI, "execute" do
   def execute_cli(options = {})
     options = { :file => @file, :length => 2 }.update(options)
     arguments = options.collect do |key,value| 
-      "--#{key}=#{value}" if value
+      case value
+      when true: "--#{key}"
+      when nil: nil
+      else
+        "--#{key}=#{value}" 
+      end
     end.compact
     
     AlsaBackup::CLI.execute(@stdout_io, *arguments)
@@ -64,6 +69,11 @@ describe AlsaBackup::CLI, "execute" do
     execute_cli :pid => pid_file
 
     IO.read(pid_file).strip.should == $$.to_s
+  end
+
+  it "should write pid in specified file" do
+    Daemonize.should_receive(:daemonize)
+    execute_cli :background => true
   end
 
 end

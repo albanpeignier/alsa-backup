@@ -1,4 +1,2 @@
-* option to daemonize alsa.backup
-* option to write pid in a file
 * add error_handler on recorder
 * improve spec coverage
