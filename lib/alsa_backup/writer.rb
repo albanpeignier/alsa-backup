@@ -63,6 +63,8 @@ module AlsaBackup
 
       unless @sndfile and @sndfile.path == target_file
         @sndfile.close if @sndfile
+
+        Writer.rename_existing_file(target_file)
         AlsaBackup.logger.info{"new file #{File.expand_path target_file}"}
 
         FileUtils.mkdir_p File.dirname(target_file)
@@ -71,6 +73,20 @@ module AlsaBackup
       @sndfile
     end
 
+    def self.rename_existing_file(file)
+      if File.exists?(file)
+        index = 1
+
+        while File.exists?(new_file = File.suffix_basename(file, "-#{index}"))
+          index += 1
+
+          raise "can't find a free file for #{file}" if index > 1000
+        end
+
+        AlsaBackup.logger.warn "rename existing file #{File.basename(file)} into #{new_file}"
+        File.rename(file, new_file)
+      end
+    end
 
   end
 end
