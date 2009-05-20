@@ -23,6 +23,8 @@ module AlsaBackup
                 "Base directory") { |arg| options[:directory] = arg }
         opts.on("-c", "--config=CONFIG", String,
                 "Configuration file") { |arg| options[:config] = arg }
+        opts.on("-p", "--pid=PID_FILE", String,
+                "File to write the process pid") { |arg| options[:pid] = arg }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
         opts.parse!(arguments)
@@ -33,6 +35,8 @@ module AlsaBackup
       end
 
       load File.expand_path(options[:config]) if options[:config]
+
+      File.write(options[:pid], $$) if options[:pid]
 
       AlsaBackup.recorder.file = options[:file] if options[:file]
       AlsaBackup.recorder.directory = options[:directory] if options[:directory]

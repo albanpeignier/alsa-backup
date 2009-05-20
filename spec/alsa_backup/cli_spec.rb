@@ -59,4 +59,11 @@ describe AlsaBackup::CLI, "execute" do
     AlsaBackup.recorder.file.should == argument_file
   end
 
+  it "should write pid in specified file" do
+    pid_file = test_file("pid")
+    execute_cli :pid => pid_file
+
+    IO.read(pid_file).strip.should == $$.to_s
+  end
+
 end

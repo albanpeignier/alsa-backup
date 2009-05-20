@@ -35,4 +35,8 @@ class File
       extension
   end
 
+  def self.write(file, content)
+    File.open(file, "w") { |f| f.puts content }
+  end
+
 end
