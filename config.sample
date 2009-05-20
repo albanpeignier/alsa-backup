@@ -38,6 +38,25 @@ AlsaBackup.config do |recorder|
   # Define where the files are created
   #
   #recorder.directory = "/var/lib/alsa.backup"
+
+  # 
+  # Customize error handler during record
+  # 
+
+  # To sleep 30 seconds on error
+  #recorder.error_handler = Proc.new do |exception| 
+  #  30
+  #end
+
+  # To fail on any error
+  #recorder.error_handler = Proc.new do |exception| 
+  #  false
+  #end
+
+  # To sleep the default time
+  #recorder.error_handler = Proc.new do |exception| 
+  #  true
+  #end
 end
 
 

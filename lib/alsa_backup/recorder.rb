@@ -6,9 +6,11 @@ module AlsaBackup
     def initialize(file = "record.wav")
       @file = File.basename(file)
       @directory = File.dirname(file)
+
+      @error_handler = Proc.new { |e| true }
     end
 
-    attr_accessor :file, :directory
+    attr_accessor :file, :directory, :error_handler
 
     def start(seconds_to_record = nil)
       length_controller = self.length_controller(seconds_to_record)
@@ -26,7 +28,24 @@ module AlsaBackup
     rescue Exception => e
       AlsaBackup.logger.error(e)
       AlsaBackup.logger.debug { e.backtrace.join("\n") }
-      raise e
+
+      if seconds_to_record.nil? and continue_on_error?(e)
+        retry
+      else
+        raise e
+      end
+    end
+
+    def continue_on_error?(e)
+      error_handler_response = @error_handler.call(e) if @error_handler
+
+      if error_handler_response
+        sleep_time = Numeric === error_handler_response ? error_handler_response : 5
+        AlsaBackup.logger.warn("sleep #{sleep_time}s before retrying")
+        sleep sleep_time
+      end
+
+      error_handler_response
     end
 
     def format(additional_parameters = {})

@@ -1,2 +1,4 @@
-* add error_handler on recorder
+* configurable channels
+* configurable sample rate
+* configurable alsa device
 * improve spec coverage

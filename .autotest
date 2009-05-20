@@ -1,3 +1,4 @@
 Autotest.add_hook :initialize do |autotest|
   autotest.add_exception(/tmp/)
+  autotest.add_exception(/log/)
 end
