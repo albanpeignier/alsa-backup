@@ -4,12 +4,15 @@ Manifest.txt
 PostInstall.txt
 README.rdoc
 Rakefile
+TODO
 alsa-backup.gemspec
 bin/alsa.backup
+config
 config.sample
 lib/alsa.rb
 lib/alsa_backup.rb
 lib/alsa_backup/cli.rb
+lib/alsa_backup/core_ext.rb
 lib/alsa_backup/length_controller.rb
 lib/alsa_backup/recorder.rb
 lib/alsa_backup/writer.rb
@@ -23,6 +26,7 @@ script/destroy
 script/generate
 spec/alsa/pcm_spec.rb
 spec/alsa_backup/cli_spec.rb
+spec/alsa_backup/core_ext_spec.rb
 spec/alsa_backup/recorder_spec.rb
 spec/alsa_backup/writer_spec.rb
 spec/alsa_backup_spec.rb
