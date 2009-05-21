@@ -9,7 +9,7 @@ $hoe = Hoe.new('alsa-backup', AlsaBackup::VERSION) do |p|
   p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
   p.rubyforge_name       = p.name # TODO this is default value
   p.extra_deps         = [
-    ['ffi','>= 0.3.5'],
+    ['ffi','>= 0.3.5'], ['newgem', ">= #{::Newgem::VERSION}"]
   ]
   p.extra_dev_deps = [
     ['newgem', ">= #{::Newgem::VERSION}"]
@@ -25,3 +25,10 @@ require 'newgem/tasks' # load /tasks/*.rake
 Dir['tasks/**/*.rake'].each { |t| load t }
 
 task :default => :spec
+
+namespace :gems do
+  task :install do
+    gems = %w{activesupport ffi rspec}
+    sh "sudo gem install #{gems.join(' ')}"
+  end
+end
