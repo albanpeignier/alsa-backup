@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.executables = ["alsa.backup"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc"]
   s.files = [".autotest", "History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc", "Rakefile", "TODO", "alsa-backup.gemspec", "bin/alsa.backup", "config", "config.sample", "lib/alsa.rb", "lib/alsa_backup.rb", "lib/alsa_backup/cli.rb", "lib/alsa_backup/core_ext.rb", "lib/alsa_backup/length_controller.rb", "lib/alsa_backup/recorder.rb", "lib/alsa_backup/writer.rb", "lib/sndfile.rb", "refs/alsa-record-example.rb", "refs/pcm_wrap.rb", "refs/sndfile-make-sine.rb", "refs/sndfile_wrap.rb", "script/console", "script/destroy", "script/generate", "spec/alsa/pcm_spec.rb", "spec/alsa_backup/cli_spec.rb", "spec/alsa_backup/core_ext_spec.rb", "spec/alsa_backup/recorder_spec.rb", "spec/alsa_backup/writer_spec.rb", "spec/alsa_backup_spec.rb", "spec/fixtures/config_test.rb", "spec/sndfile/info_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "tasks/rspec.rake"]
-  s.has_rdoc = true
+  s.has_rdoc = false
   s.homepage = %q{http://github.com/alban.peignier/alsa-backup}
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib"]
