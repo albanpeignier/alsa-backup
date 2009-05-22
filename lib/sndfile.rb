@@ -130,7 +130,9 @@ module Sndfile
     attach_function :open, :sf_open, [ :string, :int, :pointer ], :pointer
     attach_function :close, :sf_close, [ :pointer ], :int
 
-    attach_function :write_int, :sf_write_int, [ :pointer, :pointer, :int ], :int
+    # TODO off_t won't work on windows
+    attach_function :write_int, :sf_write_int, [ :pointer, :pointer, :off_t ], :off_t
+
 
     attach_function :strerror, :sf_strerror, [ :pointer ], :string
   end
