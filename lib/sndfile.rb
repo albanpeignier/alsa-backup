@@ -1,7 +1,20 @@
 require 'rubygems'
 require 'ffi'
 
+require 'logger'
+
 module Sndfile
+
+  def self.logger
+    unless @logger
+      @logger = Logger.new(STDERR)
+      @logger.level = Logger::WARN
+    end
+
+    @logger
+  end
+
+  def self.logger=(logger); @logger = logger; end
 
   class File
 
@@ -27,7 +40,10 @@ module Sndfile
     end
 
     def write(buffer, frame_count)
-      unless Sndfile::Native::write_int(@handle, buffer, frame_count) == frame_count
+      ALSA.logger.debug('sndfile') { "write #{frame_count} frames in #{path}"}
+      write_count = Sndfile::Native::write_int(@handle, buffer, frame_count) 
+
+      unless write_count == frame_count
         raise self.error
       end
     end
