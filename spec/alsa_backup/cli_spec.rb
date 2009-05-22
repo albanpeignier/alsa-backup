@@ -15,11 +15,10 @@ describe AlsaBackup::CLI, "execute" do
   def execute_cli(options = {})
     options = { :file => @file, :length => 2 }.update(options)
     arguments = options.collect do |key,value| 
-      case value
-      when true: "--#{key}"
-      when nil: nil
-      else
-        "--#{key}=#{value}" 
+      if value
+        returning "--#{key}" do |argument|
+          argument << "=#{value}" unless value == true
+        end
       end
     end.compact
     
@@ -71,7 +70,7 @@ describe AlsaBackup::CLI, "execute" do
     IO.read(pid_file).strip.should == $$.to_s
   end
 
-  it "should write pid in specified file" do
+  it "should daemonize the process with option background" do
     Daemonize.should_receive(:daemonize)
     execute_cli :background => true
   end
