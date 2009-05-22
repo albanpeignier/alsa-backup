@@ -1,3 +1,10 @@
+== 0.0.4
+
+* Replace :int by :off_t in Sndfile#write_int prototype
+* Add logger in Sndfile
+* Use a 500ms buffer in ALSA::Capture#read
+* Add daemons in gem dependencies
+
 == 0.0.3
 
 * Support --background to daemonize process
