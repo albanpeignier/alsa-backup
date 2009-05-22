@@ -10,7 +10,9 @@ $:.unshift(File.dirname(__FILE__) + '/../lib')
 require 'alsa_backup'
 
 def test_directory
-  File.dirname(__FILE__) + '/../tmp'
+  directory = File.dirname(__FILE__) + '/../tmp'
+  Dir.mkdir(directory) unless File.exists?(directory)
+  directory
 end
 
 def test_file(name = 'test.wav')
