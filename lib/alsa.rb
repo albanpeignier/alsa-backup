@@ -91,7 +91,10 @@ module ALSA
       end
 
       def read
-        frame_count = hw_params.sample_rate / 2
+        ALSA.logger.debug('alsa') { "start read with #{hw_params.sample_rate}, #{hw_params.channels} channels"}
+
+        # use an 500ms buffer
+        frame_count = hw_params.sample_rate / 2 * hw_params.channels
         
         FFI::MemoryPointer.new(:char, hw_params.buffer_size_for(frame_count)) do |buffer|
           begin
