@@ -40,7 +40,7 @@ module Sndfile
     end
 
     def write(buffer, frame_count)
-      ALSA.logger.debug('sndfile') { "write #{frame_count} frames in #{path}"}
+      ALSA.logger.debug { "write #{frame_count} frames in #{path}"}
       write_count = Sndfile::Native::write_int(@handle, buffer, frame_count) 
 
       unless write_count == frame_count

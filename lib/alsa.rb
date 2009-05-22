@@ -17,7 +17,7 @@ module ALSA
   def self.logger=(logger); @logger = logger; end
 
   def self.try_to(message, &block)
-    logger.debug('alsa') { message }
+    logger.debug { message }
     if ALSA::Native::error_code?(response = yield)
       raise "cannot #{message} (#{ALSA::Native::strerror(response)})"
     else
@@ -91,7 +91,7 @@ module ALSA
       end
 
       def read
-        ALSA.logger.debug('alsa') { "start read with #{hw_params.sample_rate}, #{hw_params.channels} channels"}
+        ALSA.logger.debug { "start read with #{hw_params.sample_rate}, #{hw_params.channels} channels"}
 
         # use an 500ms buffer
         frame_count = hw_params.sample_rate / 2 * hw_params.channels
@@ -107,7 +107,7 @@ module ALSA
         read_count = ALSA::try_to "read from audio interface" do
           response = ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
           if ALSA::Native::error_code?(response)
-            ALSA.logger.debug('alsa') { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
+            ALSA.logger.debug { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
             ALSA::PCM::Native::pcm_recover(self.handle, response, 1)
           else
             response
@@ -116,7 +116,7 @@ module ALSA
 
         missing_frame_count = frame_count - read_count
         if missing_frame_count > 0
-          ALSA.logger.debug('alsa') { "re-read missing frame count: #{missing_frame_count}"}
+          ALSA.logger.debug { "re-read missing frame count: #{missing_frame_count}"}
           read_buffer_size = hw_params.buffer_size_for(read_count)
           # buffer[read_buffer_size] doesn't return a MemoryPointer
           read_buffer(buffer + read_buffer_size, missing_frame_count)
