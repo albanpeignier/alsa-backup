@@ -15,22 +15,37 @@ module AlsaBackup
     def start(seconds_to_record = nil)
       length_controller = self.length_controller(seconds_to_record)
 
-      Writer.open(directory, file, format(:format => "wav pcm_16")) do |writer|
-        ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le)) do |capture|
+      open_writer do |writer|
+        open_capture do |capture|
           capture.read do |buffer, frame_count|
             writer.write buffer, frame_count
             length_controller.continue_after? frame_count
           end
         end
       end
-    rescue Interrupt
-      AlsaBackup.logger.debug('recorder interrupted')      
     rescue Exception => e
+      retry if handle_error(e, seconds_to_record.nil?)
+    end
+
+    def open_writer(&block)
+      Writer.open(directory, file, format(:format => "wav pcm_16"), &block)      
+    end
+
+    def open_capture(&block)
+      ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le), &block)      
+    end
+
+    def handle_error(e, try_to_continue = true)
+      if Interrupt === e
+        AlsaBackup.logger.debug('recorder interrupted')      
+        return false 
+      end
+
       AlsaBackup.logger.error(e)
       AlsaBackup.logger.debug { e.backtrace.join("\n") }
 
-      if seconds_to_record.nil? and continue_on_error?(e)
-        retry
+      if try_to_continue and continue_on_error?(e)
+        return true
       else
         raise e
       end
