@@ -9,14 +9,6 @@ end
 
 class File
 
-  def self.extension(file)
-    if file =~ /(\.[^.]*)$/
-      $1
-    else
-      ""
-    end
-  end
-
   def self.suffix_basename(file, suffix)
     dirname = File.dirname(file)
     
@@ -28,7 +20,7 @@ class File
         dirname + "/"
       end
 
-    extension = File.extension(file)
+    extension = File.extname(file)
     dirname +
       File.basename(file, extension) +
       suffix +

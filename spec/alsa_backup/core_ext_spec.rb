@@ -14,22 +14,6 @@ describe Time do
 end
 
 describe File do
-  
-  describe "extension" do
-    
-    it "should be .rb for test.rb" do
-      File.extension('test.rb').should == '.rb'
-    end
-
-    it "should be '.' for 'test.'" do
-      File.extension('test.').should == '.'
-    end
-
-    it "should be blank for 'test'" do
-      File.extension('test').should be_blank
-    end
-
-  end
 
   describe "suffix_basename" do
 
