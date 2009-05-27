@@ -1,3 +1,7 @@
+== 0.0.5
+
+* Fixe half buffer writing in recording file
+
 == 0.0.4
 
 * Replace :int by :off_t in Sndfile#write_int prototype
