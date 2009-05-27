@@ -18,7 +18,7 @@ module AlsaBackup
       open_writer do |writer|
         open_capture do |capture|
           capture.read do |buffer, frame_count|
-            writer.write buffer, frame_count
+            writer.write buffer, frame_count*format[:channels]
             length_controller.continue_after? frame_count
           end
         end
