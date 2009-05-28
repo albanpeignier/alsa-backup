@@ -13,6 +13,11 @@
 #  logger.level = Logger::INFO
 #end
 
+#
+# To debug
+#
+#Sndfile::logger = ALSA::logger = AlsaBackup.logger = Logger.new(STDOUT)
+
 AlsaBackup.logger.info("load config #{__FILE__}")
 
 AlsaBackup.config do |recorder|
