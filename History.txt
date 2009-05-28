@@ -1,6 +1,10 @@
+== 0.0.6
+
+* Fix file writing problem
+
 == 0.0.5
 
-* Fixe half buffer writing in recording file
+* Fix half buffer writing in recording file
 
 == 0.0.4
 
