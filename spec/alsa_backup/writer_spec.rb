@@ -5,20 +5,20 @@ describe AlsaBackup::Writer do
   before(:each) do
     @file = "test.wav"
     @directory = test_directory
-    @recorder = AlsaBackup::Writer.new(@file, @directory)
+    @writer = AlsaBackup::Writer.new(@file, @directory)
   end
 
   describe "file" do
     
     it "should accept file as string" do
-      @recorder.file = file_name = "dummy"
-      @recorder.file.should == file_name
+      @writer.file = file_name = "dummy"
+      @writer.file.should == file_name
     end
 
     it "should accept file as Proc" do
       file_name = "dummy"
-      @recorder.file = Proc.new { file_name }
-      @recorder.file.should == file_name
+      @writer.file = Proc.new { file_name }
+      @writer.file.should == file_name
     end
     
   end
@@ -46,6 +46,25 @@ describe AlsaBackup::Writer do
       lambda do
         AlsaBackup::Writer.rename_existing_file(@file)
       end.should raise_error
+    end
+
+  end
+
+  describe "close" do
+
+    it "should close current sndfile" do
+      sndfile = @writer.sndfile
+      sndfile.should_receive(:close)
+      @writer.close      
+    end
+    
+    it "should remove closed file if empty" do
+      @writer.sndfile
+
+      File.stub!(:zero?).and_return(true)
+      File.should_receive(:delete).with(@writer.target_file)
+
+      @writer.close
     end
 
   end

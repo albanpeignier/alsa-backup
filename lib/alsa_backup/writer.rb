@@ -39,7 +39,13 @@ module AlsaBackup
     def close
       if @sndfile
         AlsaBackup.logger.info('close current file')
-        @sndfile.close 
+        @sndfile.close
+
+        closed_file = @sndfile.path
+        if File.zero?(closed_file)
+          AlsaBackup.logger.warn('remove empty file #{closed_file}')
+          File.delete closed_file
+        end
       end
       @sndfile = nil
     end
