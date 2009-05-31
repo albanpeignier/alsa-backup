@@ -58,10 +58,12 @@ describe AlsaBackup::Writer do
       @writer.close      
     end
     
-    it "should remove closed file if empty" do
+    it "should remove closed file if it doesn't contain data" do
       @writer.sndfile
 
-      File.stub!(:zero?).and_return(true)
+      File.stub!(:exists?).and_return(true)
+      File.stub!(:size).and_return(44)
+
       File.should_receive(:delete).with(@writer.target_file)
 
       @writer.close

@@ -17,9 +17,9 @@ module AlsaBackup
     end
 
     def self.open(directory, file, format, &block)
-      writer = Writer.new(directory, file, format).prepare
-
+      writer = Writer.new(directory, file, format)
       begin
+        writer.prepare
         yield writer
       ensure
         writer.close
@@ -34,19 +34,15 @@ module AlsaBackup
 
     def write(*arguments)
       self.sndfile.write *arguments
+      @on_close = nil
     end
 
     def close
       if @sndfile
         AlsaBackup.logger.info('close current file')
         @sndfile.close
-
-        closed_file = @sndfile.path
-        if File.zero?(closed_file)
-          AlsaBackup.logger.warn('remove empty file #{closed_file}')
-          File.delete closed_file
-        end
       end
+      @on_close.call if @on_close
       @sndfile = nil
     end
 
@@ -74,9 +70,18 @@ module AlsaBackup
         AlsaBackup.logger.info{"new file #{File.expand_path target_file}"}
 
         FileUtils.mkdir_p File.dirname(target_file)
+
+        @on_close = Proc.new { Writer.delete_empty_file(target_file) }
         @sndfile = Sndfile::File.new(target_file, "w", self.format)
       end
       @sndfile
+    end
+
+    def self.delete_empty_file(file)
+      if File.exists?(file) and File.size(file) <= 44
+        AlsaBackup.logger.warn("remove empty file #{file}")
+        File.delete file
+      end
     end
 
     def self.rename_existing_file(file)
