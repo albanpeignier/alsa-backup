@@ -7,10 +7,15 @@ module AlsaBackup
       @file = File.basename(file)
       @directory = File.dirname(file)
 
+      @device = "hw:0"
+      @sample_rate = 44100
+      @channels = 2
+
       @error_handler = Proc.new { |e| true }
     end
 
     attr_accessor :file, :directory, :error_handler
+    attr_accessor :device, :sample_rate, :channels
 
     def start(seconds_to_record = nil)
       length_controller = self.length_controller(seconds_to_record)
@@ -32,7 +37,7 @@ module AlsaBackup
     end
 
     def open_capture(&block)
-      ALSA::PCM::Capture.open("hw:0", self.format(:sample_format => :s16_le), &block)      
+      ALSA::PCM::Capture.open(device, self.format(:sample_format => :s16_le), &block)      
     end
 
     def handle_error(e, try_to_continue = true)
@@ -64,7 +69,7 @@ module AlsaBackup
     end
 
     def format(additional_parameters = {})
-      {:sample_rate => 44100, :channels => 2}.merge(additional_parameters)
+      {:sample_rate => sample_rate, :channels => channels}.merge(additional_parameters)
     end
 
     def length_controller(seconds_to_record)

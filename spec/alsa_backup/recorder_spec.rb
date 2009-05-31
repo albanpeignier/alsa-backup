@@ -13,6 +13,34 @@ describe AlsaBackup::Recorder do
     lambda { @recorder.start(2) }.should_not raise_error
   end
 
+  it "should use the specified alsa device" do
+    @recorder.device = alsa_device = "dummy"
+    ALSA::PCM::Capture.should_receive(:open).with(alsa_device, anything)
+    @recorder.open_capture
+  end
+
+  it "should use the specified sample rate" do
+    @recorder.sample_rate = 48000
+    @recorder.format[:sample_rate].should == @recorder.sample_rate
+  end
+
+  it "should use the specified channels" do
+    @recorder.channels = 4
+    @recorder.format[:channels].should == @recorder.channels
+  end
+
+  it "should use 44100 as default sample rate" do
+    @recorder.sample_rate.should == 44100
+  end
+
+  it "should use 2 as default channels" do
+    @recorder.channels.should == 2
+  end
+
+  it "should use hw:0 as default device" do
+    @recorder.device.should == "hw:0"
+  end
+
   describe "error handler" do
 
     class TestErrorHandler

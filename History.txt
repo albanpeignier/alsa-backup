@@ -1,3 +1,7 @@
+== 0.0.7
+
+* Make configurable channels, sample rate and alsa device
+
 == 0.0.6
 
 * Fix file writing problem

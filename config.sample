@@ -21,6 +21,23 @@
 AlsaBackup.logger.info("load config #{__FILE__}")
 
 AlsaBackup.config do |recorder|
+
+  # 
+  # To specify the alsa device to be used
+  #
+  #recorder.device = "plughw:0"
+
+  # 
+  # To specify the channel count to be used
+  #
+  #recorder.channels = 1
+  #recorder.channels = 4
+
+  # 
+  # To specify the sample_rate to be used
+  #
+  #recorder.sample_rate = 48000
+                  
   #
   # To use files named like this :
   # - 2009/05-May/17-Sun/19h.wav
