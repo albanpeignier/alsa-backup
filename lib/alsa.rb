@@ -107,7 +107,7 @@ module ALSA
         read_count = ALSA::try_to "read from audio interface" do
           response = ALSA::PCM::Native::readi(self.handle, buffer, frame_count)
           if ALSA::Native::error_code?(response)
-            ALSA.logger.debug { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
+            ALSA.logger.warn { "try to recover '#{ALSA::Native::strerror(response)}' on read"}
             ALSA::PCM::Native::pcm_recover(self.handle, response, 1)
           else
             response
