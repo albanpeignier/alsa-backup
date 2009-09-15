@@ -1,0 +1,13 @@
+Source: alsa-backup
+Section: sound
+Priority: optional
+Maintainer: Alban Peignier <alban.peignier@free.fr>
+Build-Depends: debhelper, cdbs, ruby-pkg-tools, libsetup-ruby1.8
+Build-Depends-Indep: ruby1.8
+Standards-Version: 3.8.1
+Homepage: http://github.com/alban.peignier/alsa-backup
+
+Package: alsa-backup
+Architecture: all
+Depends: ruby, libruby, libasound2, libsndfile1, libdaemons-ruby, libffi-ruby, libactivesupport-ruby
+Description: ALSA client to perform continuous recording
