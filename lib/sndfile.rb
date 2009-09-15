@@ -33,7 +33,7 @@ module Sndfile
     def initialize(path, mode, info)
       info = (Hash === info ? Info.new(info) : info)
       @handle = Sndfile::Native::open path, File.native_mode(mode), info.to_native
-      if @handle.is_a?(FFI::NullPointer)
+      if @handle.null?
         raise "Not able to open output file " + self.error
       end
       @path = path
