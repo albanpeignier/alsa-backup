@@ -5,7 +5,7 @@ describe AlsaBackup::Writer do
   before(:each) do
     @file = "test.wav"
     @directory = test_directory
-    @writer = AlsaBackup::Writer.new(@file, @directory)
+    @writer = AlsaBackup::Writer.new @directory, @file
   end
 
   describe "file" do
