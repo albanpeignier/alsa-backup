@@ -3,8 +3,6 @@
 #  Created on 2009-5-14.
 #  Copyright (c) 2009. All rights reserved.
 
-require File.expand_path(File.dirname(__FILE__) + "/../lib/alsa_backup")
-
 require 'alsa_backup'
 require 'alsa_backup/cli'
 
