@@ -1,1 +1,3 @@
+* check write permissions of directories created by Writer
+* replace ALSA::try_to blocks by Proxy with method_missing
 * improve spec coverage

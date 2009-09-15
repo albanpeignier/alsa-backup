@@ -33,11 +33,11 @@ module AlsaBackup
     end
 
     def open_writer(&block)
-      Writer.open(directory, file, format(:format => "wav pcm_16"), &block)      
+      Writer.open(directory, file, format(:format => "wav pcm_16"), &block)     
     end
 
     def open_capture(&block)
-      ALSA::PCM::Capture.open(device, self.format(:sample_format => :s16_le), &block)      
+      ALSA::PCM::Capture.open(device, format(:sample_format => :s16_le), &block)      
     end
 
     def handle_error(e, try_to_continue = true)
