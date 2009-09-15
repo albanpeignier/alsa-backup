@@ -20,7 +20,7 @@ will record in record.wav the default alsa device
 
 By using command line arguments :
 
-  alsa.backup --directoy=/tmp --file=test.wav --length=2
+  alsa.backup --directory=/tmp --file=test.wav --length=2
 
 will record 2 seconds in /tmp/test.wav
 
