@@ -7,6 +7,8 @@ module AlsaBackup
     end
 
     class FrameCount
+      attr_reader :frame_count
+
       def initialize(frame_count)
         @frame_count = frame_count
       end

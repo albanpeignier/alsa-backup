@@ -19,3 +19,17 @@ Spec::Rake::SpecTask.new do |t|
   t.spec_opts = ['--options', "spec/spec.opts"]
   t.spec_files = FileList['spec/**/*_spec.rb']
 end
+
+namespace :spec do
+  desc "Generate spec HTML report"
+  Spec::Rake::SpecTask.new('html') do |t|
+    t.spec_opts = ["--format", "html:spec.html", "--diff"]
+    t.fail_on_error = false
+  end
+
+  desc "Generate rcov report"
+  Spec::Rake::SpecTask.new('rcov') do |t|
+    t.rcov = true
+    t.rcov_opts = %w{--exclude / --include-file ^lib}
+  end
+end

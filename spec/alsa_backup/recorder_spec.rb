@@ -41,6 +41,11 @@ describe AlsaBackup::Recorder do
     @recorder.device.should == "hw:0"
   end
 
+  it "should stop the recording on Interrupt error" do
+    @recorder.stub!(:open_writer).and_raise(Interrupt)
+    @recorder.start
+  end
+
   describe "error handler" do
 
     class TestErrorHandler
