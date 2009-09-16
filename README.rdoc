@@ -14,19 +14,19 @@ ALSA client to perform continuous recording
 
 By using the default settings :
 
-  alsa.backup 
+  alsa-backup 
 
 will record in record.wav the default alsa device
 
 By using command line arguments :
 
-  alsa.backup --directory=/tmp --file=test.wav --length=2
+  alsa-backup --directory=/tmp --file=test.wav --length=2
 
 will record 2 seconds in /tmp/test.wav
 
 By loading a configuration :
 
-  alsa.backup --config=/path/to/config
+  alsa-backup --config=/path/to/config
 
 will load the specified configuration
 

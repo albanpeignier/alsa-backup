@@ -9,7 +9,7 @@ module AlsaBackup
 
       OptionParser.new do |opts|
         opts.banner = <<-BANNER.gsub(/^          /,'')
-          Alsa.Backup : continuous recording with alsa
+          AlsaBackup : continuous recording with alsa
 
           Usage: #{File.basename($0)} [options]
 
@@ -44,7 +44,7 @@ module AlsaBackup
 
       pid_file = File.expand_path(options[:pid]) if options[:pid]
 
-      Daemonize.daemonize(nil, "alsa.backup") if options[:daemonize]
+      Daemonize.daemonize(nil, "alsa-backup") if options[:daemonize]
       File.write(pid_file, $$) if pid_file
       
       length = options[:length].to_i if options[:length]

@@ -8,10 +8,10 @@
 ### END INIT INFO                                                                                                                                          
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/alsa.backup
+DAEMON=/usr/bin/alsa-backup
 DAEMON_OPTS=""
 DAEMON_USER=""
-NAME=alsa.backup
+NAME=alsa-backup
 DESC="alsa backup"
 
 test -x $DAEMON || exit 0

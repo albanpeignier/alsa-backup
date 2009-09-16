@@ -6,7 +6,7 @@ README.rdoc
 Rakefile
 TODO
 alsa-backup.gemspec
-bin/alsa.backup
+bin/alsa-backup
 config.sample
 lib/alsa.rb
 lib/alsa_backup.rb
