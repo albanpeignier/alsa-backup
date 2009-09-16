@@ -41,7 +41,7 @@ module AlsaBackup
     end
 
     def handle_error(e, try_to_continue = true)
-      if Interrupt === e
+      if Interrupt === e or SignalException === e
         AlsaBackup.logger.debug('recorder interrupted')      
         return false 
       end
