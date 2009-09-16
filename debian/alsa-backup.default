@@ -1,0 +1,11 @@
+# 
+# alsa-backup daemon won't start if
+# * DAEMON_USER is empty
+# * the CONFIG_FILE is not found
+#
+
+# Don't use root !
+DAEMON_USER=
+
+# Edit the default configuration :
+# CONFIG_FILE=/etc/alsa-backup.conf

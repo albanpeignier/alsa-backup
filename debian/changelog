@@ -1,3 +1,9 @@
+alsa-backup (0.0.7-2) unstable; urgency=low
+
+  * Add init.d and default configuration files
+
+ -- Alban Peignier <alban.peignier@free.fr>  Wed, 16 Sep 2009 17:58:24 +0200
+
 alsa-backup (0.0.7-1) unstable; urgency=low
 
   * Initial release

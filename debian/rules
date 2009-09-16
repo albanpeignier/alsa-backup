@@ -2,3 +2,6 @@
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/ruby-pkg-tools/1/class/ruby-setup-rb.mk
+
+install/alsa-backup::
+	 cp $(DEB_SRCDIR)/debian/alsa-backup.conf debian/$(cdbs_curpkg)/etc/
